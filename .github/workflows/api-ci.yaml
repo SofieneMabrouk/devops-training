@@ -19,6 +19,7 @@ jobs:
           filters: |
             api:
               - 'components/api/**'
+              - 'workflows/api-ci.yaml'   
 
   build-api:
    runs-on: ubuntu-latest
