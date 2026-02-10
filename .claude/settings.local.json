@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(git -C \"C:/Users/s.mabrouk/projects/devops-training\" status)",
-      "Bash(git -C \"C:/Users/s.mabrouk/projects/devops-training\" diff HEAD)",
-      "Bash(git -C \"C:/Users/s.mabrouk/projects/devops-training\" log --oneline -5)"
-    ]
-  }
-}
