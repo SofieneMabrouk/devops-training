@@ -102,7 +102,7 @@ jobs:
       - name: build and push to GHCR
         uses: docker/build-push-action@v6
         with:
-          context: components/api
+          context: "./components/api"
           push: true
           tags: ghcr.io/${{ env.OWNER_LC }}/devops-training:${{ github.ref_name }}
         
