@@ -82,9 +82,8 @@
 name: Exercise 5C - Multi-Service Builds
 
 on:
-  push:
-    branches: [test-workflows]
-
+  workflow_dispatch:
+    
 jobs:
   build-api:
     runs-on: ubuntu-latest
