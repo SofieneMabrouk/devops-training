@@ -609,17 +609,17 @@ Before YAML, you decide these:
 
 1. **Create a workflow that validates all components in this repo** :
 
-- [ ] Runs PRs and can be manually triggered
-- [ ] Does not allow commit / code change in the repo
-- [ ] Run checks for:
+- [x] Runs PRs and can be manually triggered
+- [x] Does not allow commit / code change in the repo
+- [x] Run checks for:
   - `components/api` (must run `npm ci` + `npm run build`)
   - `components/core` (must run `npm ci` + `npm run build`)
   - `components/web` (must run `npm ci` + `npm run lint` + `npm run build`)
 
-- [ ] Prevents a job from hanging forever
-- [ ] Setup Node 20 via `actions/setup-node`
-- [ ] Speed up and Optimize the workflow by Caching project dependencies
-- [ ] Detect changes under:
+- [x] Prevents a job from hanging forever
+- [x] Setup Node 20 via `actions/setup-node`
+- [x] Speed up and Optimize the workflow by Caching project dependencies
+- [x] Detect changes under:
   - `components/api/**`
   - `components/core/**`
   - `components/web/**`

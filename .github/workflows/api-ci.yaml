@@ -21,7 +21,29 @@ jobs:
               - 'components/api/**'
               - 'workflows/api-ci.yaml'   
 
+  test-api:
+    needs: [check-changes]
+    if: needs.check-changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: components/api
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+      - name: install deps
+        run: npm ci
+      - name: run tests
+        run: npm run test:coverage
+      - name: upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage
+          path: components/api/coverage/index.html
+
   build-api:
+   needs: [test-api]
    runs-on: ubuntu-latest
    timeout-minutes: 15
    defaults:
@@ -41,18 +63,3 @@ jobs:
     - name: build api
       run: npm run build
 
-  test-api:
-    needs: [check-changes, build-api]
-    if: needs.check-changes.outputs.api == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: components/api
-    steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v4
-      - name: install deps
-        run: npm ci
-      - name: run tests
-        run: npm run test:coverage
