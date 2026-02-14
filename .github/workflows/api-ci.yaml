@@ -17,6 +17,8 @@ jobs:
     outputs:
       api: ${{steps.changes.outputs.api}}
     steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
       - name: Check changes
         uses: dorny/paths-filter@v3
         id: changes
