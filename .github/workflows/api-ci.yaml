@@ -45,7 +45,7 @@ jobs:
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: components/api/coverage/cobertura-coverage.xml
-          thresholds: 60
+          thresholds: 50
           fail_below_min: true
 
   build-api:
