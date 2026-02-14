@@ -623,15 +623,15 @@ Before YAML, you decide these:
   - `components/api/**`
   - `components/core/**`
   - `components/web/**`
-- [ ] Run CI only for changed packages
+- [x] Run CI only for changed packages
 
 2. **Test API CI** :
 
-- [ ] Ensure all integration tests are passed before building the API component
+- [x] Ensure all integration tests are passed before building the API component
 
-- [ ] Publish useful build outputs from CI runs to manually download/review HTML reports. use `actions/upload-artifact@v4`
+- [x] Publish useful build outputs from CI runs to manually download/review HTML reports. use `actions/upload-artifact@v4`
 
-- [ ] upload and display coverage report on PRs. it must fail for coverage < 60. use `irongut/CodeCoverageSummary@v1.3.0`
+- [x] upload and display coverage report on PRs. it must fail for coverage < 60. use `irongut/CodeCoverageSummary@v1.3.0`
 
 3. **Image Delivery** :
 
