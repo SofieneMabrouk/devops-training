@@ -24,6 +24,7 @@ jobs:
           filters: |
             api:
               - 'components/api/**'
+              - '.github/workflows/api-ci.yaml'
 
   test-api:
     needs: [check-changes]
