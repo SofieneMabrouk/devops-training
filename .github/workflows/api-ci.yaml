@@ -44,7 +44,7 @@ jobs:
       - name: display coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          filename: coverage/**/coverage.cobertura.xml
+          filename: components/api/coverage/index.html
           thresholds: 60
           fail_below_min: true
 
