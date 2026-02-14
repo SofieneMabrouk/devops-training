@@ -85,6 +85,7 @@ jobs:
   #     - name: build api
   #       run: npm run build
 
+  ## Comment to test build and push steps
   build-and-push-api:
     needs: [test-api]
     runs-on: ubuntu-latest
