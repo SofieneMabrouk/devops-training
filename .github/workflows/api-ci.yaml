@@ -43,7 +43,7 @@ jobs:
         uses: ./.github/actions/setup-node-project
         with:
           node-version: "20"
-          workdir: "/components/api"
+          workdir: components/api
       - name: run tests
         run: npm run test:coverage
       - name: upload code coverage
