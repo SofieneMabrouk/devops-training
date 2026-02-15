@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "components/web/**"
+      - ".github/workflows/web-ci.yaml"
   workflow_dispatch:
 
 permissions:
@@ -16,6 +17,8 @@ jobs:
       run:
         working-directory: components/web
     steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
       - name: Setup Node project
         uses: ./.github/actions/setup-node-project
         with:
