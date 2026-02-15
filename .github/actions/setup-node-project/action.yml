@@ -1,69 +1,24 @@
-# Exercise 4: Composite Action - Setup Node Project
-#
-# GOAL: Create a reusable composite action that sets up a Node.js project
-#
-# Requirements:
-# 1. Define metadata:
-#    - name: 'Setup Node.js Project'
-#    - description: 'Checkout code, setup Node, and install dependencies'
-#
-# 2. Accept two inputs:
-#    - 'node-version' (string, default: '22')
-#    - 'working-directory' (string, default: '.')
-#
-# 3. Define one output:
-#    - 'cache-hit' (whether npm cache was hit)
-#    - Use the value from the setup-node step
-#
-# 4. Create steps that:
-#    - Checkout code (actions/checkout@v4)
-#    - Setup Node.js with caching (actions/setup-node@v4)
-#    - Install dependencies (npm ci)
-#
-# HINTS:
-# - MUST include: runs.using: 'composite'
-# - ALWAYS specify 'shell: bash' for 'run:' steps in composite actions
-# - Access inputs: ${{ inputs.input-name }}
-# - Set step IDs to reference outputs: id: setup-node
-# - Output from setup-node: ${{ steps.setup-node.outputs.cache-hit }}
-#
-# YOUR SOLUTION BELOW:
-# ====================
-
-# TODO: Add name
-name: Setup Node Project
-
-# TODO: Add description
-description: Checkout code, setup Node, and install dependencies
-
-# TODO: Define inputs here
+name: "Setup Node Project"
+description: "A composite action to setup a Node.js project with caching"
 inputs:
+  workdir:
+    description: "Working directory of the Node.js project (relative to repo root)"
+    required: true
   node-version:
-    description: The version of Node.js to use
+    description: "Node.js version to use"
     required: true
-    default: "22"
-  working-directory:
-    description: The directory to work in
-    required: true
-    default: "."
-# TODO: Define outputs here
-outputs:
-  cache-hit:
-    description: Whether the npm cache was hit
-    value: ${{ steps.setup-node.outputs.cache-hit }}
-# TODO: Define runs section with 'composite' type and steps
+    default: "20"
 runs:
   using: "composite"
   steps:
-    - name: checkout code
+    - name: Checkout the repo
       uses: actions/checkout@v4
-    - name: setup node
+    - name: cache deps
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
         cache: "npm"
-        cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
-    - name: install dependencies
+        cache-dependency-path: ${{ inputs.workdir }}/package-lock.json
+    - name: install deps
       shell: bash
       run: npm ci
-      working-directory: ${{ inputs.working-directory }}

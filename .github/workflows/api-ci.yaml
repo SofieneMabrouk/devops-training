@@ -2,7 +2,7 @@ name: Build and Test API
 on:
   # pull_request:
   push:
-    branches: 
+    branches:
       - test-workflows
   workflow_dispatch:
 
@@ -37,10 +37,11 @@ jobs:
       run:
         working-directory: components/api
     steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v4
-      - name: install deps
-        run: npm ci
+      - name: Setup Node project
+        uses: ./.github/actions/setup-node-project
+        with:
+          node-version: "20"
+          workdir: "./components/api"
       - name: run tests
         run: npm run test:coverage
       - name: upload code coverage
@@ -85,7 +86,6 @@ jobs:
   #     - name: build api
   #       run: npm run build
 
-  ## Comment to test build and push steps cache
   build-and-push-api:
     needs: [test-api]
     runs-on: ubuntu-latest
