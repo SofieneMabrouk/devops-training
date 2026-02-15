@@ -23,6 +23,6 @@ jobs:
         uses: ./.github/actions/setup-node-project
         with:
           node-version: "20"
-          workdir: "./components/core"
+          workdir: /components/core
       - name: build core
         run: npm run build
