@@ -16,7 +16,7 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
         cache: "npm"
-        cache-dependency-path: ${{ inputs.workdir }}/package-lock.json
+        cache-dependency-path: ${{ github.workspace }}/${{ inputs.workdir }}/package-lock.json
     - name: install deps
       shell: bash
       run: npm ci
