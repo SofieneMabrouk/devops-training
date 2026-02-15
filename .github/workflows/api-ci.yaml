@@ -1,0 +1,117 @@
+name: Build and Test API
+on:
+  # pull_request:
+  push:
+    branches:
+      - test-workflows
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  packages: write
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{steps.changes.outputs.api}}
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+      - name: Check changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            api:
+              - 'components/api/**'
+              - '.github/workflows/api-ci.yaml'
+
+  test-api:
+    needs: [check-changes]
+    if: needs.check-changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: components/api
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+      - name: Setup Node project
+        uses: ./.github/actions/setup-node-project
+        with:
+          node-version: "20"
+          workdir: components/api
+      - name: run tests
+        run: npm run test:coverage
+      - name: upload code coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage
+          path: |
+            components/api/coverage
+      - name: display coverage report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: components/api/coverage/cobertura-coverage.xml
+          thresholds: 50
+          fail_below_min: true
+          format: "markdown"
+          output: "both"
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+          path: code-coverage-results.md
+
+  # build-api:
+  #   needs: [test-api]
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
+  #   defaults:
+  #     run:
+  #       working-directory: components/api
+  #   steps:
+  #     - name: Checkout the repo
+  #       uses: actions/checkout@v4
+  #     - name: cache deps
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
+  #         cache: "npm"
+  #         cache-dependency-path: components/api/package-lock.json
+  #     - name: install deps
+  #       run: npm ci
+  #     - name: build api
+  #       run: npm run build
+
+  build-and-push-api:
+    needs: [test-api]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set lowercase owner name
+        env:
+          OWNER: "${{ github.repository_owner }}"
+        run: |
+          echo "OWNER_LC=$(echo $OWNER | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - name: build and push to GHCR
+        uses: docker/build-push-action@v6
+        with:
+          context: components/api
+          push: true
+          tags: ghcr.io/${{ env.OWNER_LC }}/devops-training:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

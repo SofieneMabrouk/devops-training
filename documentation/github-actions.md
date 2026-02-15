@@ -1,739 +1,683 @@
-# GitHub Actions Documentation
+# GitHub Actions - Complete Reference
 
-## Overview
+This document contains all GitHub Actions concepts covered in the DevOps training, organized for easy reference.
 
-GitHub Actions is a continuous integration and continuous deployment (CI/CD) platform that automates workflows directly in your GitHub repository. It enables you to build, test, and deploy code automatically when you push commits, create pull requests, or perform other repository events.
+**Note:** The training follows a deep-learning approach with:
+- Comprehensive theory before exercises
+- Multiple exercises (2-4) per topic for retention
+- Progressive difficulty: Basic → Reinforcement → Integration → Challenge
+- Thorough review and consolidation before moving forward
 
-### Role and Purpose
+---
 
-GitHub Actions serves as an automation platform that:
-- **Automates software workflows** directly in your GitHub repository
-- **Builds, tests, and deploys** code automatically based on repository events
-- **Orchestrates complex CI/CD pipelines** using YAML configuration files
-- **Integrates seamlessly** with GitHub's ecosystem and third-party services
-- **Provides hosted runners** or supports self-hosted runners for execution
+## Table of Contents
 
-## Continuous Integration and Continuous Deployment (CI/CD)
+1. [Fundamentals](#fundamentals)
+2. [Core Patterns](#core-patterns)
+3. [Advanced Patterns](#advanced-patterns)
+4. [Docker Integration](#docker-integration)
+5. [Best Practices](#best-practices)
+6. [Troubleshooting](#troubleshooting)
+
+---
+
+## Fundamentals
 
 ### What is CI/CD?
 
-**Continuous Integration (CI)** is a practice where developers frequently integrate code changes into a shared repository, with automated builds and tests detecting integration errors quickly.
+**Continuous Integration (CI):**
+- Automatically build and test code on every push
+- Catch bugs early
+- Ensure code quality
 
-**Continuous Deployment/Delivery (CD)** extends CI by automatically deploying code changes to production or staging environments after passing tests and quality checks.
+**Continuous Delivery/Deployment (CD):**
+- Automatically deploy tested code to environments
+- Reduce manual deployment errors
+- Ship faster and more reliably
 
-### Development Workflow Before CI/CD
+### GitHub Actions Architecture
 
-Before CI/CD, teams worked differently:
+```
+Workflow (YAML file)
+  ├── Event Trigger (push, pull_request, workflow_dispatch)
+  ├── Job 1
+  │   ├── Runner (ubuntu-latest, windows-latest, macos-latest)
+  │   └── Steps
+  │       ├── Step 1 (uses: actions/checkout@v4)
+  │       ├── Step 2 (run: npm install)
+  │       └── Step 3 (run: npm test)
+  └── Job 2 (depends on Job 1)
+      └── Steps...
+```
 
-**Typical Workflow:**
-
-1. **Long Development Cycles**
-   - Developers worked in isolation for days or weeks
-   - Code stayed on individual machines without integration
-
-2. **Manual Testing**
-   - Tests run manually on local machines
-   - Testing often skipped due to time constraints
-
-3. **Manual Builds**
-   - Build steps required manual execution
-   - Failures discovered late
-
-4. **Manual Deployments**
-   - Manual deployment package preparation
-   - Pushing a lot of changes to live all at once, making releases stressful and risky
-   - Difficult rollbacks
-
-#### Common Problems Without CI/CD
-
-1. **Integration Conflicts**: Conflicting changes required hours of manual resolution. "It works on my machine" was common.
-
-2. **Delayed Bug Detection**: Bugs found only during integration sessions, making debugging difficult.
-
-3. **Inconsistent Environments**: Different configurations across machines and environments caused frequent issues.
-
-4. **Lack of Quality Assurance**: No automated checks for code quality, style, or security vulnerabilities.
-
-5. **Slower Release Cycles**: Manual integration, testing, and deployment phases added weeks to releases.
-
-6. **High Risk Deployments**: Large batches of changes deployed manually with limited testing, making rollbacks difficult.
-
-### Solution
-
-- **Automated workflows** triggered by repository events (push, pull request, release)
-- **Consistent testing environments** using containerized or pre-configured runners
-- **Reusable actions** from the GitHub Marketplace or custom actions
-- **Native GitHub integration** without external service configuration
-- **Parallel job execution** for faster CI/CD pipelines
-- **Secrets management** for secure credential handling
-
-## Key Concepts
-
-### 1. Workflows
-
-A workflow is an automated process defined by a YAML file in the `.github/workflows/` directory. A repository can have multiple workflows, each performing different sets of tasks.
-
-**Characteristics:**
-- Defined in YAML files (`.yml` or `.yaml`)
-- Stored in `.github/workflows/` directory
-- Triggered by events (push, pull_request, schedule, manual, etc.)
-- Can be enabled or disabled per repository
-
-### 2. Jobs
-
-A job is a set of steps that execute on the same runner. Jobs run in parallel by default but can depend on other jobs using the `needs` keyword.
-
-**Characteristics:**
-- Run in parallel by default
-- Can have dependencies on other jobs
-- Can run on different operating systems (Ubuntu, Windows, macOS)
-
-### 3. Steps
-
-Steps are individual tasks that run commands or actions. Steps execute sequentially within a job.
-
-**Types of steps:**
-- **Run commands**: Execute shell commands or scripts
-- **Use actions**: Reusable units of code from the marketplace or custom actions
-
-### 4. Actions
-
-Actions are reusable units of code that can be shared across workflows. They can be:
-- **Pre-built actions** from GitHub Marketplace
-- **Custom actions** created by your organization
-
-### 5. Runners
-
-Runners are machines that execute workflows. GitHub provides hosted runners, or you can host your own.
-
-**GitHub-hosted runners:**
-- Ubuntu Linux, Windows, macOS
-- Pre-installed software (Git, Node.js, Docker, etc.)
-- Free tier limits apply
-
-**Self-hosted runners:**
-- Your own machines
-- Full control over environment
-- No usage limits
-
-### 6. Events
-
-Events are specific activities that trigger workflows, such as:
-- `push`: Code pushed to a branch
-- `pull_request`: Pull request opened, synchronized, or closed
-- `workflow_dispatch`: Manual workflow trigger
-- `schedule`: Cron-based scheduled execution
-- `release`: Release published
-- `workflow_call`: Workflow triggered by another workflow
-
-### 7. Secrets and Variables
-
-**Secrets:**
-- Encrypted variables for sensitive data (API keys, passwords, tokens)
-- Stored in repository settings
-- Masked in logs
-
-**Variables:**
-- Non-sensitive configuration values
-- Can be set at organization, repository, or environment level
-
-## YAML File Composition
-
-A typical GitHub Actions workflow file structure:
+### Workflow File Structure
 
 ```yaml
 name: Workflow Name
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
   workflow_dispatch:
-
-env:
-  NODE_VERSION: '20'
 
 jobs:
   job-name:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Step Name
         uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Run tests
-        run: npm test
-      
-      - name: Build
-        run: npm run build
+      - name: Run Command
+        run: echo "Hello World"
 ```
 
-### Workflow File Structure Breakdown
+**File Location:** `.github/workflows/*.yml`
 
-```yaml
-name:                    # Workflow name displayed in GitHub UI
-on:                      # Events that trigger the workflow
-  event-type:
-    conditions:          # Event-specific conditions
-env:                     # Environment variables (global)
-jobs:                    # Collection of jobs
-  job-id:                # Unique job identifier
-    runs-on:             # Runner OS
-    needs:               # Job dependencies
-    env:                 # Job-specific environment variables
-    steps:               # Collection of steps
-      - name:            # Step name
-        uses:            # Action to use
-        with:            # Action inputs
-        run:             # Command to execute
-        env:             # Step-specific environment variables
-```
+---
 
-## Example Workflows
-
-### Example 1: CI Workflow for Node.js Application
-
-```yaml
-name: CI
-
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
-
-env:
-  NODE_VERSION: '20'
-
-jobs:
-  lint-and-test-api:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./components/api
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Run linter
-        run: npm run lint
-      
-      - name: Run tests
-        run: npm test
-      
-      - name: Build
-        run: npm run build
-
-  lint-and-test-core:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./components/core
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: components/core/package-lock.json
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Run linter
-        run: npm run lint
-      
-      - name: Run tests
-        run: npm test
-      
-      - name: Build
-        run: npm run build
-
-  lint-and-test-web:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./components/web
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: components/web/package-lock.json
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Run linter
-        run: npm run lint
-      
-      - name: Run tests
-        run: npm test
-      
-      - name: Build
-        run: npm run build
-```
-
-### Example 2: Docker Build and Push Workflow
-
-Building and pushing Docker images to a container registry:
-
-```yaml
-name: Build and Push Docker Images
-
-on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'components/**'
-  workflow_dispatch:
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_PREFIX: ${{ github.repository_owner }}
-
-jobs:
-  build-and-push-api:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    defaults:
-      run:
-        working-directory: ./components/api
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/api
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: ./components/api
-          file: ./components/api/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  build-and-push-core:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    defaults:
-      run:
-        working-directory: ./components/core
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/core
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: ./components/core
-          file: ./components/core/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-```
-
-## Common Workflow Patterns
+## Core Patterns
 
 ### 1. Job Dependencies
-
-Run jobs sequentially based on dependencies:
 
 ```yaml
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Build
-        run: npm run build
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: dist/
-
+      - run: echo "Building..."
+  
   test:
-    needs: build
+    needs: build  # Runs after 'build' completes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: dist/
-      - run: npm test
-
+      - run: echo "Testing..."
+  
   deploy:
-    needs: [build, test]
+    needs: [build, test]  # Runs after both complete
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy
-        run: echo "Deploying..."
+      - run: echo "Deploying..."
 ```
 
-### 2. Conditional Execution
-
-Run steps or jobs based on conditions:
+### 2. Environment Variables
 
 ```yaml
+# Workflow-level
+env:
+  NODE_VERSION: "22"
+
 jobs:
-  conditional-job:
-    runs-on: ubuntu-latest
+  # Job-level
+  build:
+    env:
+      BUILD_DIR: ./dist
     steps:
-      - name: Always runs
-        run: echo "This always runs"
-      
-      - name: Only on main branch
-        if: github.ref == 'refs/heads/main'
-        run: echo "Only on main"
-      
-      - name: Only on pull requests
-        if: github.event_name == 'pull_request'
-        run: echo "PR check"
-      
-      - name: Only if previous step succeeded
-        if: success()
-        run: echo "Previous step succeeded"
-```
-
-### 3. Environment Secrets
-
-Using secrets in workflows:
-
-```yaml
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Use secret
-        run: |
-          echo "Deploying with secret"
-          # Secrets are automatically available as environment variables
-          echo "${{ secrets.DATABASE_URL }}" | docker login ...
-      
-      - name: Use multiple secrets
+      # Step-level
+      - name: Build
         env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          echo "Connecting to $DB_HOST"
+          API_URL: https://api.example.com
+        run: npm run build
 ```
 
-### 4. Workflow Reusability
+**Access:** `${{ env.VARIABLE_NAME }}`
 
-Calling reusable workflows:
+### 3. Secrets Management
 
 ```yaml
-# .github/workflows/reusable-build.yml
+steps:
+  - name: Deploy
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided
+    run: ./deploy.sh
+```
+
+**Setting Secrets:** Repository Settings → Secrets and variables → Actions
+
+### 4. Conditional Execution
+
+```yaml
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'  # Only on main branch
+    steps:
+      - name: Production Deploy
+        if: success()  # Only if previous steps succeeded
+        run: ./deploy.sh
+      
+      - name: Notify on Failure
+        if: failure()  # Only if previous steps failed
+        run: ./notify-slack.sh
+```
+
+**Common Conditions:**
+- `success()` - Previous steps succeeded
+- `failure()` - Previous steps failed
+- `always()` - Always run
+- `cancelled()` - Workflow was cancelled
+- `github.ref == 'refs/heads/main'` - Specific branch
+
+### 5. Working Directory Defaults
+
+```yaml
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: ./components/web
+    steps:
+      - run: npm install  # Runs in ./components/web
+      - run: npm test     # Runs in ./components/web
+```
+
+### 6. Caching Dependencies
+
+```yaml
+- name: Setup Node.js
+  uses: actions/setup-node@v4
+  with:
+    node-version: '22'
+    cache: 'npm'
+    cache-dependency-path: './components/web/package-lock.json'
+```
+
+**Cache Hit:** Subsequent runs are ~70% faster
+
+### 7. Artifacts
+
+**Upload:**
+```yaml
+- name: Upload build artifacts
+  uses: actions/upload-artifact@v4
+  with:
+    name: dist
+    path: ./dist
+    retention-days: 7
+```
+
+**Download:**
+```yaml
+- name: Download build artifacts
+  uses: actions/download-artifact@v4
+  with:
+    name: dist
+    path: ./dist
+```
+
+---
+
+## Advanced Patterns
+
+### 1. Matrix Strategies
+
+```yaml
+jobs:
+  test:
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm test
+```
+
+**Result:** 6 parallel jobs (3 Node versions × 2 OS)
+
+### 2. Reusable Workflows
+
+**Reusable Workflow** (`.github/workflows/reusable-build.yml`):
+```yaml
 name: Reusable Build
 
 on:
   workflow_call:
     inputs:
-      component:
+      node-version:
         required: true
         type: string
-      node-version:
-        required: false
+      working-directory:
+        required: true
         type: string
-        default: '20'
+    outputs:
+      cache-hit:
+        description: "Whether cache was hit"
+        value: ${{ jobs.build.outputs.cache-hit }}
+    secrets:
+      NPM_TOKEN:
+        required: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./components/${{ inputs.component }}
+    outputs:
+      cache-hit: ${{ steps.setup-node.outputs.cache-hit }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        id: setup-node
         with:
           node-version: ${{ inputs.node-version }}
+          cache: 'npm'
       - run: npm ci
       - run: npm run build
+```
 
-# .github/workflows/main.yml
-name: Main Workflow
-
-on:
-  push:
-    branches: [ main ]
-
+**Caller Workflow:**
+```yaml
 jobs:
-  build-api:
-    uses: ./.github/workflows/reusable-build.yml
-    with:
-      component: api
-      node-version: '20'
-  
-  build-core:
-    uses: ./.github/workflows/reusable-build.yml
-    with:
-      component: core
-  
   build-web:
     uses: ./.github/workflows/reusable-build.yml
     with:
-      component: web
+      node-version: '22'
+      working-directory: './components/web'
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
-## Common Commands and Operations
+### 3. Composite Actions
 
-### Manual Workflow Execution
+**Composite Action** (`.github/actions/setup-node-project/action.yml`):
+```yaml
+name: Setup Node Project
+description: Checkout code, setup Node, and install dependencies
 
-Workflows with `workflow_dispatch` can be triggered manually from the GitHub UI:
+inputs:
+  node-version:
+    description: Node.js version
+    required: true
+    default: '22'
+  working-directory:
+    description: Working directory
+    required: true
+    default: '.'
 
-1. Go to **Actions** tab in your repository
-2. Select the workflow
-3. Click **Run workflow**
-4. Choose branch and inputs (if any)
-5. Click **Run workflow**
+outputs:
+  cache-hit:
+    description: Whether npm cache was hit
+    value: ${{ steps.setup-node.outputs.cache-hit }}
 
-### Viewing Workflow Runs
-
-- **GitHub UI**: Navigate to Actions tab to see all workflow runs
-- **CLI**: Use GitHub CLI (`gh run list`, `gh run view`, `gh run watch`)
-
-### Checking Workflow Status
-
-```bash
-# List recent workflow runs
-gh run list
-
-# View specific workflow run
-gh run view <run-id>
-
-# Watch a running workflow
-gh run watch <run-id>
-
-# View workflow logs
-gh run view <run-id> --log
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node
+      id: setup-node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+    
+    - name: Install dependencies
+      shell: bash  # REQUIRED for composite actions
+      run: npm ci
+      working-directory: ${{ inputs.working-directory }}
 ```
 
-### Re-running Workflows
+**Usage:**
+```yaml
+steps:
+  - name: Setup Project
+    id: setup
+    uses: ./.github/actions/setup-node-project
+    with:
+      node-version: '22'
+      working-directory: './components/web'
+  
+  - name: Check cache
+    run: echo "Cache hit: ${{ steps.setup.outputs.cache-hit }}"
+```
 
-- **GitHub UI**: Click "Re-run all jobs" or "Re-run failed jobs" in the Actions tab
-- **CLI**: `gh run rerun <run-id>`
+**Key Differences:**
+| Feature | Reusable Workflow | Composite Action |
+|---------|-------------------|------------------|
+| Level | Job level | Step level |
+| Location | `.github/workflows/` | `.github/actions/` |
+| Trigger | `workflow_call` | `uses:` in steps |
+| Shell | Automatic | Must specify `shell: bash` |
+| Outputs | Job outputs | Step outputs |
+
+---
+
+## Docker Integration
+
+### 1. Building and Pushing to GHCR
+
+```yaml
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write  # Required for GHCR
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/my-app
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+      
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./components/web
+          file: ./components/web/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+```
+
+### 2. Key Docker Actions
+
+**`docker/setup-buildx-action@v3`:**
+- Advanced build engine
+- Multi-platform builds
+- Layer caching
+
+**`docker/login-action@v3`:**
+- Authenticate with registries
+- Supports GHCR, Docker Hub, ECR, etc.
+
+**`docker/metadata-action@v5`:**
+- Auto-generate tags and labels
+- Semantic versioning support
+- OCI-compliant metadata
+
+**`docker/build-push-action@v6`:**
+- Build Docker images
+- Push to registries
+- GitHub Actions cache integration
+
+### 3. Image Tagging Strategies
+
+```yaml
+tags: |
+  type=ref,event=branch           # Branch name: main
+  type=ref,event=pr               # PR number: pr-123
+  type=sha,prefix={{branch}}-     # Commit SHA: main-abc1234
+  type=semver,pattern={{version}} # Semantic: v1.2.3
+  type=semver,pattern={{major}}.{{minor}}  # Major.minor: 1.2
+  type=raw,value=latest,enable={{is_default_branch}}  # latest on main
+```
+
+### 4. GHCR Permissions
+
+```yaml
+jobs:
+  build:
+    permissions:
+      contents: read    # Read repository code
+      packages: write   # Write to GitHub Packages (GHCR)
+```
+
+**Without `packages: write`:** Authentication fails when pushing images
+
+---
 
 ## Best Practices
 
-### 1. Use Specific Action Versions
+### 1. DRY Principle
 
-Always pin actions to specific versions or SHA commits:
-
+**Bad:**
 ```yaml
-# ✅ Good - specific version
-- uses: actions/checkout@v4
-
-# ✅ Better - specific SHA
-- uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
-
-# ❌ Bad - branch or tag
-- uses: actions/checkout@main
+jobs:
+  build-web:
+    defaults:
+      run:
+        working-directory: ./components/web
+    steps:
+      - uses: ./.github/actions/setup-node-project
+        with:
+          working-directory: ./components/web
 ```
 
-### 2. Minimize Workflow Permissions
-
-Use the least privilege principle:
-
+**Good:**
 ```yaml
-permissions:
-  contents: read      # Only read repository contents
-  packages: write     # Only write to packages
-  actions: read       # Only read actions
+jobs:
+  build-web:
+    env:
+      WORKING_DIR: ./components/web
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: ./.github/actions/setup-node-project
+        with:
+          working-directory: ${{ env.WORKING_DIR }}
 ```
 
-### 3. Cache Dependencies
-
-Cache npm, pip, or other package manager dependencies to speed up workflows:
-
-```yaml
-- uses: actions/cache@v4
-  with:
-    path: ~/.npm
-    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-```
-
-### 4. Use Matrix Strategies
-
-Test across multiple versions and configurations:
+### 2. Fail Fast with Matrix
 
 ```yaml
 strategy:
+  fail-fast: true  # Stop all jobs if one fails
   matrix:
     node-version: [18, 20, 22]
-    os: [ubuntu-latest, windows-latest, macos-latest]
 ```
 
-### 5. Handle Failures Gracefully
-
-Use `if: always()` to run cleanup steps regardless of success or failure:
+### 3. Conditional Builds with Path Filters
 
 ```yaml
-- name: Cleanup
-  if: always()
-  run: |
-    docker compose down -v
-    # Cleanup commands
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'components/web/**'
+      - '.github/workflows/build-web.yml'
 ```
 
-### 6. Separate Secrets from Variables
+**Result:** Workflow only runs when web component changes
 
-- **Secrets**: Sensitive data (API keys, passwords, tokens)
-- **Variables**: Non-sensitive configuration (URLs, version numbers)
-
-### 7. Use Environment Protection Rules
-
-Protect production deployments with required reviewers and environment-specific secrets.
-
-### 8. Optimize Workflow Speed
-
-- Run independent jobs in parallel
-- Use job dependencies for sequential requirements
-- Cache dependencies and build artifacts
-- Use matrix strategies efficiently
-
-### 9. Document Workflows
-
-Add comments and clear step names:
+### 4. Separate Jobs for Each Service
 
 ```yaml
-- name: Build Docker image for API component
-  # This step builds the API Docker image with multi-stage build
-  # The context is set to components/api directory
-  run: docker build -t api:latest ./components/api
+jobs:
+  build-web:
+    # ... build web
+  
+  build-api:
+    # ... build api
+  
+  build-core:
+    # ... build core
 ```
 
-### 10. Test Workflows Locally
+**Benefits:**
+- Parallel execution
+- Independent failures
+- Selective rebuilds
 
-Use `act` or similar tools to test workflows locally before pushing:
+### 5. Use GitHub Actions Cache for Docker
 
-```bash
-# Install act
-brew install act  # macOS
-# or download from GitHub releases
-
-# Run workflow locally
-act -j build
+```yaml
+- uses: docker/build-push-action@v6
+  with:
+    cache-from: type=gha
+    cache-to: type=gha,mode=max
 ```
 
-## Workflow Status Badges
+**Speed Improvement:** ~70% faster builds on cache hit
 
-Add workflow status badges to your README:
+### 6. Version Pin Important Actions
 
-```markdown
-![CI](https://github.com/username/repo/workflows/CI/badge.svg)
-![Deploy](https://github.com/username/repo/workflows/Deploy/badge.svg)
+```yaml
+# Good: Pinned to specific version
+- uses: actions/checkout@v4
+
+# Better: Pinned to commit SHA (most secure)
+- uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
 ```
 
-## Troubleshooting Common Issues
+---
 
-### 1. Workflow Not Triggering
+## Troubleshooting
 
-- Check event syntax in `on:` section
-- Verify file is in `.github/workflows/` directory
-- Ensure file has `.yml` or `.yaml` extension
-- Check branch names match exactly
+### Common Issues
 
-### 2. Permissions Denied
+**1. Permission Denied When Pushing to GHCR**
+```yaml
+# Solution: Add packages: write permission
+permissions:
+  packages: write
+```
 
-- Review workflow permissions
-- Check repository secrets and variables
-- Verify GitHub token permissions
+**2. Cache Not Working**
+```yaml
+# Ensure cache-dependency-path is correct
+- uses: actions/setup-node@v4
+  with:
+    cache: 'npm'
+    cache-dependency-path: './path/to/package-lock.json'
+```
 
-### 3. Jobs Timing Out
+**3. Composite Action Shell Error**
+```yaml
+# Always specify shell in composite actions
+runs:
+  using: 'composite'
+  steps:
+    - run: npm ci
+      shell: bash  # REQUIRED
+```
 
-- Increase timeout: `timeout-minutes: 30`
-- Optimize slow steps
-- Check for hanging processes
+**4. Workflow Not Triggering**
+- Check file location: Must be in `.github/workflows/` root
+- Check YAML syntax: Use YAML validator
+- Check branch filters: Ensure branch matches trigger
 
-### 4. Caching Not Working
+**5. Secrets Not Available**
+```yaml
+# Secrets must be passed explicitly to reusable workflows
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/reusable.yml
+    secrets:
+      MY_SECRET: ${{ secrets.MY_SECRET }}
+```
 
-- Verify cache key uniqueness
-- Check cache path matches restore path
-- Ensure cache key changes when dependencies change
+---
 
-### 5. Secrets Not Available
+## Context Variables Reference
 
-- Verify secrets are set in repository settings
-- Check secret names match exactly (case-sensitive)
-- Ensure secrets are not masked in logs incorrectly
+### GitHub Context
 
-## References
+```yaml
+${{ github.actor }}              # User who triggered workflow
+${{ github.repository }}         # owner/repo-name
+${{ github.repository_owner }}   # owner
+${{ github.ref }}                # refs/heads/branch-name
+${{ github.sha }}                # Commit SHA
+${{ github.event_name }}         # push, pull_request, etc.
+${{ github.workspace }}          # /home/runner/work/repo/repo
+```
 
-- [GitHub Actions Documentation](https://docs.github.com/en/actions) - Complete GitHub Actions documentation
-- [GitHub Actions Reference](https://docs.github.com/en/actions/reference) - Workflow syntax and API reference
-- [GitHub Marketplace](https://github.com/marketplace?type=actions) - Browse and discover reusable actions
-- [GitHub Actions Examples](https://docs.github.com/en/actions/examples) - Example workflows and use cases
+### Job Context
 
+```yaml
+${{ job.status }}                # success, failure, cancelled
+```
+
+### Steps Context
+
+```yaml
+${{ steps.step-id.outputs.output-name }}
+${{ steps.step-id.outcome }}     # success, failure, cancelled, skipped
+${{ steps.step-id.conclusion }}  # success, failure, cancelled, skipped
+```
+
+### Runner Context
+
+```yaml
+${{ runner.os }}                 # Linux, Windows, macOS
+${{ runner.temp }}               # Temp directory
+```
+
+---
+
+## Exercise Organization Pattern
+
+### Structure
+```
+.github/workflows/exercises/
+├── exercise-01-name.yml           # Clean template (never modified)
+├── exercise-02-name.yml
+├── exercise-03-name.yml
+└── solutions/
+    ├── solution-01-name.yml       # Completed work
+    ├── solution-02-name.yml
+    └── solution-03-name.yml
+```
+
+### Template Pattern
+```yaml
+# Exercise X: Title
+#
+# GOAL: Brief description
+#
+# Requirements:
+# 1. First requirement
+# 2. Second requirement
+#
+# HINTS:
+# - Helpful hint 1
+# - Helpful hint 2
+#
+# YOUR SOLUTION BELOW:
+# ====================
+
+name: Exercise Name
+on:
+  push:
+    branches: [test-workflows]
+
+jobs:
+  # TODO: Your solution here
+```
+
+### Workflow Lifecycle
+1. **Active Exercise:** `on: push: branches: [test-workflows]`
+2. **After Completion:** Move to `solutions/`, change to `on: workflow_dispatch`
+3. **Template:** Remains clean in `exercises/` root
+
+---
+
+## Additional Resources
+
+### Official Documentation
+- [GitHub Actions Docs](https://docs.github.com/en/actions)
+- [Workflow Syntax](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions)
+- [Docker Actions](https://github.com/docker/build-push-action)
+
+### Marketplace
+- [GitHub Actions Marketplace](https://github.com/marketplace?type=actions)
+
+---
+
+**Last Updated:** January 7, 2026  
+**Phase:** GitHub Actions (In Progress)

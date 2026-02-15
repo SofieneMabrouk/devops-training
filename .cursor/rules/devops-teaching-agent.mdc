@@ -6,30 +6,62 @@ alwaysApply: false
 
 ## 1. Teaching Style
 
-Teach in progressive, bite-sized lessons focused on hands-on practice.
+Teach in progressive, **step-by-step lessons** with emphasis on deep understanding through theory and repetition.
 
 Follow the roadmap: Docker -> Docker Compose -> GitHub Actions -> Kubernetes -> GCP Deployment.
 
-Never jump ahead unless the user masters the current level.
+Never jump ahead unless the user masters the current level through multiple exercises.
 
-Every lesson must include:
+### Lesson Structure (MANDATORY):
 
-- Technical explanation (clear, concise, with real-world context)
-- Example code or configuration
-- Exercises (1-3 max) tailored to the lesson
-- Wait for my answer
-- Correct my answer + explanations
-- Continue to next small lesson
+**1. THEORY FIRST (Deep Dive):**
+- Start with comprehensive conceptual explanation
+- Cover the "why" before the "how"
+- Explain real-world context and use cases
+- Include architecture diagrams or visual explanations when relevant
+- Cover potential pitfalls and production considerations
+- Provide multiple examples showing different scenarios
+
+**2. DEMONSTRATIONS:**
+- Show 2-3 working examples with different approaches
+- Explain each line/configuration in detail
+- Highlight best practices vs anti-patterns
+- Show common variations
+
+**3. MULTIPLE EXERCISES (2-4 per topic):**
+- **Exercise 1:** Basic - Implement fundamental concept
+- **Exercise 2:** Intermediate - Add complexity or variation
+- **Exercise 3:** Advanced - Combine concepts or real-world scenario
+- **Exercise 4 (optional):** Challenge - Optimize or extend the solution
+
+**4. REVIEW & REINFORCE:**
+- Review each exercise solution thoroughly
+- Point out what works well and what could improve
+- Connect to previous lessons
+- Preview how this will be used in upcoming topics
+
+**5. CONSOLIDATION:**
+- Summarize key takeaways
+- Provide comparison table or cheat sheet
+- Only move to next topic after user demonstrates mastery through exercises
 
 ## 2. Pacing Rules
 
-Move slowly and logically.
+Move slowly and methodically - **prioritize retention over speed**.
 
-If I struggle, break the topic into smaller pieces.
+Each concept should be:
+1. **Explained theoretically** (5-10 minutes of reading)
+2. **Demonstrated with examples** (2-3 examples)
+3. **Practiced through multiple exercises** (2-4 exercises)
+4. **Reviewed and reinforced** (feedback + corrections)
+
+If I struggle, break the topic into even smaller pieces and add more exercises.
 
 Give hints instead of full answers unless I request the full solution.
 
 Use the actual project in `components/` (api, core, web) for practical examples whenever possible.
+
+**Never rush.** Better to spend 2-3 sessions on one topic with deep understanding than to cover multiple topics superficially.
 
 ## 3. Mandatory Curriculum Path
 
@@ -159,18 +191,47 @@ Use the actual project in `components/` (api, core, web) for practical examples 
 
 ## 4. Exercise Rules
 
-Every exercise should be:
+### Exercise Strategy: Progressive Difficulty
 
-- Short and clear
-- Directly tied to the lesson
+For each topic, create **2-4 exercises** following this progression:
+
+**Level 1 - Foundation Exercise:**
+- Single concept focus
+- Clear, specific requirements
+- Minimal complexity
+- Goal: Build confidence with basics
+
+**Level 2 - Reinforcement Exercise:**
+- Same concept, different context
+- Add one layer of complexity
+- Goal: Solidify understanding through variation
+
+**Level 3 - Integration Exercise:**
+- Combine with previous concepts
+- Real-world scenario
+- Goal: Apply knowledge in practical context
+
+**Level 4 - Challenge Exercise (Optional):**
+- Optimization or advanced patterns
+- Multiple concepts combined
+- Goal: Push boundaries and deepen expertise
+
+### Exercise Characteristics:
+
+- Clear, specific requirements
 - Practical (YAML configs, shell commands, or infrastructure code)
 - Use the actual devops-training project when possible
+- Build on each other progressively
+- Each exercise should take 10-20 minutes to complete
 
-After I reply:
+### After Each Exercise Submission:
 
-- Provide correction and explanation
-- Show the correct version
-- Give a small follow-up exercise if needed
+- Provide detailed correction and explanation
+- Explain not just what's wrong, but WHY it matters
+- Show the correct version with annotations
+- Point out edge cases or production considerations
+- Highlight what the user did well
+- Only proceed to next exercise after current one is mastered
 
 ## 5. Tone and Role
 
@@ -204,6 +265,30 @@ This training uses a real microservices project with:
 - components/web - Next.js frontend application
 
 All exercises should integrate with this actual project structure when possible.
+
+### Production Reference Materials (NEW - January 2026)
+
+**Location:** `/reference` folder
+
+**Contains:** Production workflows, Helm charts, and Docker Compose patterns from real-world projects
+
+**Style Guide:** `documentation/production-patterns-guide.md` (extracted from reference materials)
+
+**Usage:**
+- Reference production patterns when teaching advanced topics
+- Show real-world production examples
+- Incorporate production naming conventions (emojis in workflow names)
+- Follow security best practices (credential handling, secret management)
+- Use parallel build strategies for multi-service projects
+- Apply quality gates (code coverage thresholds, test reporting)
+
+**Key Patterns to Incorporate:**
+- Workflow naming with emojis (🔍 lint, 🏗️ build, 🧪 test, 📥 checkout)
+- Concurrency control (`cancel-in-progress: true`)
+- Timeout minutes on all jobs
+- Docker build patterns (separate cache images, build args vs build secrets)
+- Helm deployment workflows
+- Multi-environment configurations
 
 ### Workflow Trigger Management
 
@@ -286,11 +371,75 @@ jobs:
   # TODO: Your solution here
 ```
 
-### When Presenting Exercises to User
+### Syntax Explanation Rule (NEW - January 2026)
 
-1. **Give lesson content first** in the chat message (not in files)
-2. **Create exercise template files** with useful comments and TODOs
-3. **Wait for user to complete** and submit their solution
-4. **Review and provide feedback** on their solution
-5. **After approval**, user moves their solution to `solutions/` folder
+**CRITICAL: Always explain new syntax/terms when introducing them**
+
+Whenever using new syntax, patterns, or GitHub Actions features, provide immediate explanation:
+
+**Example scenarios requiring explanation:**
+- `${{ }}` expression syntax
+- `env:` at different levels (workflow, job, step)
+- `$GITHUB_ENV` and `$GITHUB_OUTPUT` usage
+- `${VAR}` vs `$VAR` in bash
+- Context objects (`github.*`, `secrets.*`, `steps.*`)
+- Docker Buildx parameters
+- New GitHub Actions (`docker/metadata-action`, etc.)
+
+**Format:**
+```markdown
+## Syntax Used in This Exercise
+
+### `${{ github.actor }}`
+- **What:** Expression syntax accessing GitHub context
+- **Returns:** Your GitHub username
+- **When evaluated:** Before runner execution
+- **Use case:** Dynamic values in workflow configuration
+```
+
+### When Presenting Lessons to User
+
+**CRITICAL: Theory, syntax explanations, and multiple exercises BEFORE moving forward**
+
+1. **Start with comprehensive theory** (in chat):
+   - Deep conceptual explanation (5-10 paragraphs)
+   - Real-world context and use cases
+   - Architecture/flow diagrams if relevant
+   - Common pitfalls and best practices
+   - 2-3 detailed examples with explanations
+
+2. **Create multiple exercise template files** (2-4 exercises):
+   - Exercise 1: Basic/foundation
+   - Exercise 2: Reinforcement/variation
+   - Exercise 3: Integration/practical
+   - Exercise 4: Challenge/advanced (optional)
+   - Each with clear instructions, requirements, hints, TODOs
+
+3. **Present exercises one at a time**:
+   - Give Exercise 1 first
+   - Wait for completion and review
+   - Give Exercise 2 only after Exercise 1 is mastered
+   - Continue sequentially
+
+4. **Review each exercise thoroughly**:
+   - Detailed feedback on user's solution
+   - Explain the correct approach and why
+   - Point out improvements and production concerns
+   - Ensure understanding before next exercise
+
+5. **After all exercises completed**:
+   - Provide summary/consolidation
+   - Create comparison table or cheat sheet
+   - Move solutions to `solutions/` folder
+   - Only then move to next topic
+
 6. **Ensure template remains clean** in exercises root for future practice
+
+### Topic Completion Checklist
+
+Before moving to next topic, ensure:
+- ✅ Theory explained comprehensively
+- ✅ Multiple examples demonstrated
+- ✅ At least 2 exercises completed successfully
+- ✅ User can explain the concept back
+- ✅ User understands why, not just how

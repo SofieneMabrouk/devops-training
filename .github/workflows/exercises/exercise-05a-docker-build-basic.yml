@@ -1,0 +1,55 @@
+# Exercise 5A: Basic Docker Build & Push to GHCR
+#
+# GOAL: Build the 'web' component Docker image and push it to GitHub Container Registry
+#
+# This is the foundation exercise for Docker + GitHub Actions integration.
+# You'll learn the essential pattern: setup → authenticate → build → push.
+#
+# LEARNING OBJECTIVES:
+# - Set up Docker Buildx for advanced builds
+# - Authenticate with GHCR using GITHUB_TOKEN
+# - Build a Docker image from a Dockerfile
+# - Push the image to GitHub Container Registry
+# - Apply basic tagging (branch name)
+#
+# REQUIREMENTS:
+# 1. Trigger on push to 'test-workflows' branch
+# 2. Create job named 'build-and-push-web'
+# 3. Run on ubuntu-latest runner
+# 4. Set permissions: contents: read, packages: write
+# 5. Steps required:
+#    a) Checkout repository code
+#    b) Set up Docker Buildx
+#    c) Log in to GHCR (ghcr.io)
+#       - username: github.actor
+#       - password: GITHUB_TOKEN
+#    d) Build and push image
+#       - context: ./components/web
+#       - file: ./components/web/Dockerfile
+#       - push: true
+#       - tags: ghcr.io/${{ github.repository_owner }}/devops-web:${{ github.ref_name }}
+#       - Enable GitHub Actions cache (cache-from and cache-to with type=gha)
+#
+# HINTS:
+# - Use actions/checkout@v4 for checkout
+# - Use docker/setup-buildx-action@v3 for Buildx setup
+# - Use docker/login-action@v3 for GHCR login
+# - Use docker/build-push-action@v6 for build and push
+# - github.repository_owner gives your GitHub username
+# - github.ref_name gives the branch name (test-workflows)
+# - For cache-to, use mode=max to cache all layers
+#
+# VERIFICATION:
+# After pushing to test-workflows branch:
+# 1. Check Actions tab - workflow should complete successfully
+# 2. Check Packages tab in your GitHub profile
+# 3. You should see 'devops-web' package with tag 'test-workflows'
+#
+# YOUR SOLUTION BELOW:
+# ====================
+
+name: "Exercise 5A: Basic Docker Build"
+
+# TODO: Add trigger for push to test-workflows branch
+
+# TODO: Add jobs section with build-and-push-web job

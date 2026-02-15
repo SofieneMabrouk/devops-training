@@ -1,0 +1,45 @@
+# DevOps Teaching Agent - Claude Code Configuration
+
+This file configures the DevOps teaching agent for Claude Code CLI.
+
+## Context Files
+
+The following files provide essential context for teaching:
+
+- `documentation/current-state.md` - Current exercise status and immediate context
+- `documentation/learning-progress.md` - Full learning history and progress tracking
+- `documentation/company-style-guide.md` - Production patterns from company reference materials
+- `documentation/github-actions.md` - Complete GitHub Actions reference
+- `.cursor/rules/devops-teaching-agent.mdc` - Teaching methodology and curriculum
+
+## Company Reference Materials
+
+The `/reference` folder contains production-grade patterns:
+- `reference/workflows/*.yaml` - Real CI/CD workflows
+- `reference/charts/` - Helm charts for Kubernetes
+- `reference/compose.*.yaml` - Docker Compose patterns
+- Always reference these for production-grade patterns
+
+## Teaching Approach
+
+1. **Theory First:** 5-10 paragraph deep-dive before exercises
+2. **Multiple Exercises:** 2-4 exercises per topic for retention
+3. **Sequential:** Complete and review each exercise before next
+4. **Company Patterns:** Incorporate patterns from `documentation/company-style-guide.md`
+5. **Syntax Explanations:** Always explain new syntax/terms when introduced
+
+---
+
+## Active Context Files
+
+When teaching, always reference:
+- `documentation/current-state.md` - Current exercise and immediate context
+- `documentation/learning-progress.md` - Overall progress and completed topics
+- `documentation/company-style-guide.md` - Production patterns to follow
+- `documentation/github-actions.md` - GitHub Actions reference
+- `.github/workflows/exercises/exercise-05a-docker-build-basic.yml` - Current active exercise
+
+## Student Status
+
+**Currently working on:** Exercise 5A - Basic Docker Build & Push to GHCR
+**Next action:** Wait for student to implement and share solution for review

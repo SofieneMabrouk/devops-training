@@ -1,0 +1,145 @@
+# Exercise 5C: Multi-Service Docker Builds
+#
+# GOAL: Build and push Docker images for all three services (api, core, web) in parallel
+#
+# This exercise teaches production monorepo patterns: multiple services building
+# simultaneously on separate runners for maximum efficiency.
+#
+# LEARNING OBJECTIVES:
+# - Understand parallel job execution with `needs`
+# - Build multiple Docker images in a single workflow
+# - Apply consistent tagging across all services
+# - Optimize build time through parallelization
+#
+# REQUIREMENTS:
+# 1. Trigger on push to 'test-workflows' branch
+# 2. Create THREE separate jobs:
+#    - build-api
+#    - build-core
+#    - build-web
+# 3. Each job should:
+#    - Run on ubuntu-latest
+#    - Set permissions: contents: read, packages: write
+#    - Follow the same pattern as Exercise 5B:
+#      a) Checkout code
+#      b) Setup Docker Buildx
+#      c) Login to GHCR
+#      d) Set lowercase owner name
+#      e) Extract metadata (with service-specific image name)
+#      f) Build and push (with service-specific context/Dockerfile)
+# 4. Image naming pattern:
+#    - API: ghcr.io/<owner>/devops-training-api
+#    - Core: ghcr.io/<owner>/devops-training-core
+#    - Web: ghcr.io/<owner>/devops-training-web
+# 5. Build context paths:
+#    - API: ./components/api
+#    - Core: ./components/core
+#    - Web: ./components/web
+# 6. All images should have the same three tags:
+#    - Branch name (test-workflows)
+#    - Commit SHA (sha-abc1234)
+#    - Latest
+#
+# HINTS:
+# - Each job is independent - no `needs` dependencies required
+# - Copy the 5B pattern for each service
+# - Change only: image name, context path, and job name
+# - All three jobs will run in parallel automatically
+#
+# NEW CONCEPTS:
+#
+# ### Parallel Jobs
+# - **What:** Multiple jobs in one workflow running simultaneously
+# - **How:** Define multiple jobs at the same level (no `needs`)
+# - **Benefit:** 3x faster than sequential (15min vs 45min)
+# - **Use case:** Building multiple services in a monorepo
+#
+# ### Job Naming Convention
+# - **Pattern:** `build-<service-name>`
+# - **Examples:** build-api, build-web, build-core
+# - **Why:** Clear, consistent, easy to identify in Actions UI
+#
+# ### Service-Specific Image Names
+# - **Pattern:** `<base-name>-<service>`
+# - **Examples:**
+#   - devops-training-api
+#   - devops-training-web
+#   - devops-training-core
+# - **Why:** Each service gets its own package in GHCR
+#
+# VERIFICATION:
+# After pushing, check:
+# 1. Three jobs run simultaneously in the Actions tab
+# 2. All three complete successfully
+# 3. Three new packages appear in your GitHub Packages:
+#    - devops-training-api (with 3 tags)
+#    - devops-training-web (with 3 tags)
+#    - devops-training-core (with 3 tags)
+#
+# YOUR SOLUTION BELOW:
+# ====================
+
+name: Exercise 5C - Multi-Service Builds
+
+on:
+  workflow_dispatch:
+    
+jobs:
+  build-api:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set lowercase owner name
+        env:
+          OWNER: "${{ github.repository_owner }}"
+        run: |
+          echo "OWNER_LC=$(echo $OWNER | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - name: Extract metadata
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ env.OWNER_LC }}/devops-training-api
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-
+            type=raw,value=latest,priority=200
+      - name: Build and push with tags/labels
+        uses: docker/build-push-action@v6
+        with:
+          context: "./components/api"
+          file: "./components/api/Dockerfile"
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+          # TODO: Create build-api job
+  # - Copy pattern from Exercise 5B
+  # - Change image name to: ghcr.io/${{ env.OWNER_LC }}/devops-training-api
+  # - Change context to: ./components/api
+  # - Change file to: ./components/api/Dockerfile
+
+  # TODO: Create build-core job
+  # - Copy pattern from Exercise 5B
+  # - Change image name to: ghcr.io/${{ env.OWNER_LC }}/devops-training-core
+  # - Change context to: ./components/core
+  # - Change file to: ./components/core/Dockerfile
+
+  # TODO: Create build-web job
+  # - Copy pattern from Exercise 5B
+  # - Change image name to: ghcr.io/${{ env.OWNER_LC }}/devops-training-web
+  # - Change context to: ./components/web
+  # - Change file to: ./components/web/Dockerfile

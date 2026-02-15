@@ -1,0 +1,28 @@
+name: Build and Test Core
+on:
+  pull_request:
+    paths:
+      - "components/core/**"
+      - ".github/workflows/core-ci.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: components/core
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+      - name: Setup Node project
+        uses: ./.github/actions/setup-node-project
+        with:
+          node-version: "20"
+          workdir: components/core
+      - name: build core
+        run: npm run build

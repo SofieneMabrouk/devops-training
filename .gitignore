@@ -15,3 +15,6 @@ build
 .env.development.local
 generated
 migrations
+reference
+
+.claude

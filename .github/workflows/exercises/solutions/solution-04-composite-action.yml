@@ -21,22 +21,30 @@
 # YOUR SOLUTION BELOW:
 # ====================
 
-name: Test Composite Action (Exercise 4)
+name: Test Composite Action (Solution 4)
 on:
-  push:
-    branches: [test-workflows]
+  workflow_dispatch:
 
 jobs:
   # TODO: Create 'test-composite-action' job here
   test-composite-action:
-  steps:
-    - name: Setup Node Project
-      uses: ./.github/actions/setup-node-project
-      with:
-        node-version: "22"
-        working-directory: "${{ github.workspace }}/components/web"
-    - name: Run tests
-      run: npm test
-    - name: Echo cache hit
-      run: |
-        echo "Cache hit: ${{ steps.setup-node-project.outputs.cache-hit }}"
+    runs-on: ubuntu-latest
+    env:
+      WEB_WORKING_DIR: ${{ github.workspace }}/components/web
+    defaults:
+      run:
+        working-directory: ${{ env.WEB_WORKING_DIR }}
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node Project
+        id: setup-node-project
+        uses: ./.github/actions/setup-node-project
+        with:
+          node-version: "22"
+          working-directory: ${{ env.WEB_WORKING_DIR }}
+      - name: Run tests
+        run: npm test
+      - name: Echo cache hit
+        run: |
+          echo "Cache hit: ${{ steps.setup-node-project.outputs.cache-hit }}"
