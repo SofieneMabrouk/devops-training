@@ -1,49 +1,37 @@
 name: Build and Test API
-on: 
+on:
   pull_request:
+    paths:
+      - "components/api/**"
+      # - ".github/workflows/api-ci.yaml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  check-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      api: ${{steps.changes.outputs.api}}
-    steps:
-      - name: Check changes
-        uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            api:
-              - 'components/api/**'
-              - 'workflows/api-ci.yaml'   
-
   build-api:
-   runs-on: ubuntu-latest
-   timeout-minutes: 15
-   defaults:
-    run:
-      working-directory: components/api
-   steps:
-    - name: Checkout the repo
-      uses: actions/checkout@v4
-    - name: cache deps
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: components/api/package-lock.json
-    - name: install deps
-      run: npm ci
-    - name: build api
-      run: npm run build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: components/api
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+      - name: cache deps
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: components/api/package-lock.json
+      - name: install deps
+        run: npm ci
+      - name: build api
+        run: npm run build
 
   test-api:
-    needs: [check-changes, build-api]
-    if: needs.check-changes.outputs.api == 'true'
+    needs: [build-api]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
