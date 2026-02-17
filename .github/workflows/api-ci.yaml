@@ -48,3 +48,9 @@ jobs:
         with:
           name: api build outputs
           path: components/api/dist/
+      - name: Upload Code Coverage Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: components/api/coverage/**/coverage.cobertura.xml
+          format: markdown
+          thresholds: '60'
