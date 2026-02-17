@@ -1,0 +1,32 @@
+name: Build and Test Web
+on: 
+  pull_request:
+    paths:
+      - 'components/web/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+   runs-on: ubuntu-latest
+   timeout-minutes: 15
+   defaults:
+    run:
+      working-directory: components/web
+   steps:
+    - name: Checkout the repo
+      uses: actions/checkout@v4
+    - name: cache deps
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: components/web/package-lock.json
+    - name: install deps
+      run: npm ci
+    - name: lint web
+      run: npm run lint
+    - name: build web
+      run: npm run build

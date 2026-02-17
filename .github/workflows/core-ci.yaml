@@ -1,0 +1,30 @@
+name: Build and Test Core
+on: 
+  pull_request:
+    paths:
+      - 'components/core/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+   runs-on: ubuntu-latest
+   timeout-minutes: 15
+   defaults:
+    run:
+      working-directory: components/core
+   steps:
+    - name: Checkout the repo
+      uses: actions/checkout@v4
+    - name: cache deps
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: components/core/package-lock.json
+    - name: install deps
+      run: npm ci
+    - name: build core
+      run: npm run build
