@@ -28,7 +28,15 @@ jobs:
         with:
           filename: components/api/coverage/cobertura-coverage.xml
           format: markdown
-          thresholds: '60'
+          output: both
+          thresholds: "60"
+          fail_below_min: true
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          # recreate: true
+          path: code-coverage-results.md
 
   build-api:
     runs-on: ubuntu-latest
